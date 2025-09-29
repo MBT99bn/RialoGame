@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Hứng Bóng Rialo - Cloud</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: #000; /* nền đen */
+    }
+    canvas {
+      display: block;
+      background: #d2b48c
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    #instructions {
+      position: absolute;
+      top: 45px;
+      left: 10px;
+      color: white;
+      font-size: 14px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    #playerName {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    #speedIndicator {
+      position: absolute;
+      top: 100px;
+      left: 10px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    #highScores {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      min-width: 220px;
+      backdrop-filter: blur(10px);
+    }
+    #highScores h3 {
+      margin: 0 0 15px 0;
+      color: #333;
+      font-size: 18px;
+      text-align: center;
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .score-entry {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .score-entry:last-child {
+      border-bottom: none;
+    }
+    .rank {
+      font-weight: bold;
+      color: #667eea;
+    }
+    #registrationModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+    #registrationForm {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      min-width: 350px;
+      color: white;
+    }
+    #registrationForm h2 {
+      margin-bottom: 25px;
+      color: white;
+      font-size: 28px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    #nameInput {
+      width: 250px;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+      outline: none;
+    }
+    #startGameBtn {
+      background: linear-gradient(45deg, #ff6b6b, #ffa726);
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    #startGameBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    #startGameBtn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    #gameOverModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+    #gameOverContent {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+      text-align: center;
+      min-width: 350px;
+      color: white;
+    }
+    #gameOverContent h2 {
+      margin-bottom: 25px;
+      color: white;
+      font-size: 28px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .button-group {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 25px;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .btn-primary {
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    .btn-secondary {
+      background: linear-gradient(45deg, #ff6b6b, #f44336);
+      color: white;
+    }
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="registrationModal">
+    <div id="registrationForm">
+      <h2>🌸 Welcome to Rialo Game! 🌸</h2>
+      <p>Catch falling Rialo logos with your RialoAi Robot!!</p>
+      <input type="text" id="nameInput" placeholder="Enter your name" maxlength="20" />
+      <br>
+      <button id="startGameBtn" onclick="startGame()">Start Game</button>
+    </div>
+  </div>
+
+  <div id="gameOverModal">
+    <div id="gameOverContent">
+      <h2>Game Over!</h2>
+      <p id="finalScore"></p>
+      <p id="highScoreMessage"></p>
+      <div class="button-group">
+        <button class="btn btn-primary" onclick="playAgain()">Play Again</button>
+        <button class="btn btn-secondary" onclick="changePlayer()">Change Player</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="score">Score: 0</div>
+  <div id="instructions">Use the ← → or A D keys to move the character.
+Small Rialo Ball = 1 point !
+Large Rialo Ball = 5 points !</div>
+  <div id="playerName"></div>
+  <div id="speedIndicator">Speed: Slow</div>
+  
+  <div id="highScores">
+    <h3>🏆 High Scores</h3>
+    <div id="scoresList"></div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const cloudImg = new Image();
+    cloudImg.src = "Robot Rialo.png";
+
+
+    let currentPlayer = "";
+    let highScores = [];
+    let gameStarted = false;
+
+    // Movement tracking for seamless movement
+    let keys = {};
+    let lastFrameTime = performance.now();
+
+    const cloud = {
+      x: canvas.width / 2 - 100,
+      y: canvas.height - 140,
+      width: 200,
+      height: 130,
+      speed: 10,
+      velocity: 0
+    };
+
+    const yuppLogo = {
+      x: Math.random() * canvas.width,
+      y: 0,
+      size: 80, // Size of the logo
+      baseSpeed: 3,
+      normalSpeed: 5,
+      fastSpeed: 7,
+      speed: 3,
+      rotation: 0 // For rotation effect
+    };
+
+    // Bonus logos system
+    const bonusLogos = [];
+    const bonusLogoChance = 0.15; // 15% chance to spawn bonus logo
+    const bonusLogoSize = 120; // Bigger than regular logos
+    const bonusLogoPoints = 5; // 5 points for bonus logos
+
+    let score = 0;
+    let gameOver = false;
+
+    // 👉 Vẽ quả bóng thay cho bông hoa
+    const ballImg = new Image();
+    ballImg.src = "Bong Rialo.png"; // ảnh quả bóng
+    
+function drawBall(x, y, size, rotation = 0, isBonus = false) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+
+  if (ballImg.complete) {
+    // 👉 Nếu là bóng bonus, thêm hiệu ứng glow
+    if (isBonus) {
+      ctx.shadowColor = "gold";       // màu sáng vàng
+      ctx.shadowBlur = 30;            // độ mờ sáng
+    }
+
+    ctx.drawImage(ballImg, -size / 2, -size / 2, size, size);
+
+    // 👉 Nếu là bóng bonus thì phủ thêm lớp vàng
+    if (isBonus) {
+      ctx.globalCompositeOperation = "source-atop";
+      ctx.fillStyle = "rgba(255, 215, 0, 0.6)"; // vàng ánh kim
+      ctx.fillRect(-size / 2, -size / 2, size, size);
+      ctx.globalCompositeOperation = "source-over";
+    }
+  } else {
+    ballImg.onload = () => {
+      ctx.drawImage(ballImg, -size / 2, -size / 2, size, size);
+    };
+  }
+
+  ctx.restore();
+}
+
+
+    // Load high scores from memory
+    function loadHighScores() {
+      if (highScores.length === 0) {
+        highScores = [
+          { name: "YuppMaster", score: 50 },
+          { name: "CloudCatcher", score: 42 },
+          { name: "LogoHunter", score: 35 },
+          { name: "FlowerPower", score: 28 },
+          { name: "PetalCatcher", score: 20 }
+        ];
+      }
+      updateHighScoresDisplay();
+    }
+
+    function saveHighScore(name, score) {
+      highScores.push({ name: name, score: score });
+      highScores.sort((a, b) => b.score - a.score);
+      highScores = highScores.slice(0, 10);
+      updateHighScoresDisplay();
+    }
+
+    function updateHighScoresDisplay() {
+      const scoresList = document.getElementById("scoresList");
+      scoresList.innerHTML = "";
+      
+      highScores.forEach((entry, index) => {
+        const scoreDiv = document.createElement("div");
+        scoreDiv.className = "score-entry";
+        scoreDiv.innerHTML = `
+          <span class="rank">${index + 1}.</span>
+          <span>${entry.name}</span>
+          <span>${entry.score}</span>
+        `;
+        scoresList.appendChild(scoreDiv);
+      });
+    }
+
+    function updateLogoSpeed() {
+      const speedIndicator = document.getElementById("speedIndicator");
+      
+      if (score <= 10) {
+        yuppLogo.speed = yuppLogo.baseSpeed;
+        speedIndicator.innerText = "Speed: Slow";
+        speedIndicator.style.color = "#4CAF50";
+      } else if (score <= 20) {
+        yuppLogo.speed = yuppLogo.normalSpeed;
+        speedIndicator.innerText = "Speed: Normal";
+        speedIndicator.style.color = "#FF9800";
+      } else {
+        yuppLogo.speed = yuppLogo.fastSpeed;
+        speedIndicator.innerText = "Speed: Fast";
+        speedIndicator.style.color = "#f44336";
+      }
+    }
+
+    function startGame() {
+      const nameInput = document.getElementById("nameInput");
+      const name = nameInput.value.trim();
+      
+      if (name === "") {
+        alert("Please enter your name!");
+        return;
+      }
+      
+      currentPlayer = name;
+      document.getElementById("playerName").innerText = `Player: ${currentPlayer}`;
+      document.getElementById("registrationModal").style.display = "none";
+      gameStarted = true;
+      resetGame();
+      gameLoop();
+    }
+
+    function resetGame() {
+      score = 0;
+      gameOver = false;
+      yuppLogo.speed = yuppLogo.baseSpeed;
+      bonusLogos.length = 0; // Clear bonus logos
+      cloud.x = canvas.width / 2 - 100;
+      cloud.y = canvas.height - 140;
+      cloud.velocity = 0;
+      keys = {};
+      resetLogo();
+      updateLogoSpeed();
+      document.getElementById("score").innerText = "Score: 0";
+    }
+
+    function drawCloud() {
+      if (cloudImg.complete) {
+        ctx.drawImage(cloudImg, cloud.x, cloud.y, cloud.width, cloud.height);
+      } else {
+        cloudImg.onload = () => {
+          ctx.drawImage(cloudImg, cloud.x, cloud.y, cloud.width, cloud.height);
+        };
+      }
+    }
+
+    function updateCloudMovement(deltaTime) {
+      const acceleration = 0.8;
+      const friction = 0.88;
+      const maxSpeed = cloud.speed;
+      
+      if (keys['ArrowLeft'] || keys['a']) {
+        cloud.velocity -= acceleration * deltaTime;
+        if (cloud.velocity < -maxSpeed) cloud.velocity = -maxSpeed;
+      } else if (keys['ArrowRight'] || keys['d']) {
+        cloud.velocity += acceleration * deltaTime;
+        if (cloud.velocity > maxSpeed) cloud.velocity = maxSpeed;
+      } else {
+        cloud.velocity *= friction;
+        if (Math.abs(cloud.velocity) < 0.01) cloud.velocity = 0;
+      }
+      
+      cloud.x += cloud.velocity * deltaTime;
+      
+      // Boundary checking
+      if (cloud.x < 0) {
+        cloud.x = 0;
+        cloud.velocity = 0;
+      }
+      if (cloud.x + cloud.width > canvas.width) {
+        cloud.x = canvas.width - cloud.width;
+        cloud.velocity = 0;
+      }
+    }
+
+    function moveLogo() {
+      yuppLogo.y += yuppLogo.speed;
+      yuppLogo.rotation += 0.05; // Add rotation effect
+      
+      if (
+        yuppLogo.y + yuppLogo.size >= cloud.y &&
+        yuppLogo.x >= cloud.x - yuppLogo.size &&
+        yuppLogo.x <= cloud.x + cloud.width + yuppLogo.size
+      ) {
+        score++;
+        document.getElementById("score").innerText = "Score: " + score;
+        updateLogoSpeed();
+        resetLogo();
+        
+        // Chance to spawn bonus logo after catching regular logo
+        if (Math.random() < bonusLogoChance) {
+          spawnBonusLogo();
+        }
+      } else if (yuppLogo.y > canvas.height) {
+        gameOver = true;
+        endGame();
+      }
+    }
+
+    function spawnBonusLogo() {
+      const bonusLogo = {
+        x: Math.random() * canvas.width,
+        y: 0,
+        size: bonusLogoSize,
+        speed: yuppLogo.speed * 0.8,
+        points: bonusLogoPoints,
+        rotation: 0
+      };
+      bonusLogos.push(bonusLogo);
+    }
+
+    function moveBonusLogos() {
+      for (let i = bonusLogos.length - 1; i >= 0; i--) {
+        const bonusLogo = bonusLogos[i];
+        bonusLogo.y += bonusLogo.speed;
+        bonusLogo.rotation += 0.08; // Faster rotation for bonus logos
+        
+        // Check collision with cloud
+        if (
+          bonusLogo.y + bonusLogo.size >= cloud.y &&
+          bonusLogo.x >= cloud.x - bonusLogo.size &&
+          bonusLogo.x <= cloud.x + cloud.width + bonusLogo.size
+        ) {
+          score += bonusLogo.points;
+          document.getElementById("score").innerText = "Score: " + score;
+          bonusLogos.splice(i, 1);
+          updateLogoSpeed();
+        } else if (bonusLogo.y > canvas.height) {
+          bonusLogos.splice(i, 1);
+        }
+      }
+    }
+
+    function endGame() {
+      saveHighScore(currentPlayer, score);
+      
+      const isHighScore = highScores.findIndex(entry => entry.name === currentPlayer && entry.score === score) < 5;
+      
+      document.getElementById("finalScore").innerText = `Final Score: ${score}`;
+      document.getElementById("highScoreMessage").innerText = isHighScore ? 
+        "🎉 New High Score! Amazing!" : "Good game! Try to catch more Yupp logos!";
+      
+      document.getElementById("gameOverModal").style.display = "flex";
+    }
+
+    function playAgain() {
+      document.getElementById("gameOverModal").style.display = "none";
+      resetGame();
+      gameLoop();
+    }
+
+    function changePlayer() {
+      document.getElementById("gameOverModal").style.display = "none";
+      document.getElementById("registrationModal").style.display = "flex";
+      document.getElementById("nameInput").value = "";
+      gameStarted = false;
+    }
+
+    function resetLogo() {
+      yuppLogo.x = Math.random() * canvas.width;
+      yuppLogo.y = 0;
+      yuppLogo.rotation = 0;
+    }
+
+    function gameLoop() {
+      if (gameOver || !gameStarted) return;
+      
+      const currentTime = performance.now();
+      const deltaTime = (currentTime - lastFrameTime) / 16.67;
+      lastFrameTime = currentTime;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+	   // 👉 Vẽ chữ "RIALO GAME" làm background
+  ctx.save();
+  ctx.font = "bold 250px Arial";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.3)"; // màu trắng mờ để làm nền
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("RIALO GAME", canvas.width / 2, canvas.height / 2);
+  ctx.restore();
+
+  updateCloudMovement(deltaTime);
+  drawCloud();
+      
+      updateCloudMovement(deltaTime);
+      drawCloud();
+      
+      // Draw main Yupp logo
+      drawBall(yuppLogo.x, yuppLogo.y, yuppLogo.size, yuppLogo.rotation, false);
+      
+      // Draw bonus logos
+      bonusLogos.forEach(bonusLogo => {
+        drawBall(bonusLogo.x, bonusLogo.y, bonusLogo.size, bonusLogo.rotation, true);
+      });
+      
+      moveLogo();
+      moveBonusLogos();
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Improved key handling for seamless movement
+    document.addEventListener("keydown", (e) => {
+      if (!gameStarted || gameOver) return;
+      keys[e.key] = true;
+    });
+
+    document.addEventListener("keyup", (e) => {
+      if (!gameStarted || gameOver) return;
+      keys[e.key] = false;
+    });
+
+    // Allow Enter key to start game
+    document.getElementById("nameInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        startGame();
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      cloud.x = Math.min(cloud.x, canvas.width - cloud.width);
+      cloud.y = canvas.height - 140;
+    });
+
+    // Initialize the game
+    loadHighScores();
+  </script>
+</body>
+</html>
